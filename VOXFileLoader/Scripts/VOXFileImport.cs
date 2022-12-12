@@ -1,14 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-
 using UnityEngine;
-
-#if UNITY_EDITOR
-
-using UnityEditor;
-
-#endif
 
 namespace Cubizer
 {
@@ -245,12 +238,12 @@ namespace Cubizer
 
 			private static UnityEngine.Object _assetPrefab;
 
-			public static VoxFileData Load(string path)
+			public static VoxFileData Load(byte[] data)
 			{
-				using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+				using (var stream = new MemoryStream(data))
 				{
 					if (stream == null)
-						throw new System.Exception("Failed to open file for FileStream.");
+					throw new System.Exception("Failed to open data for MemoryStream.");
 
 					using (var reader = new BinaryReader(stream))
 					{
@@ -477,18 +470,13 @@ namespace Cubizer
 						var meshFilter = model.AddComponent<MeshFilter>();
 						var meshRenderer = model.AddComponent<MeshRenderer>();
 
-#if UNITY_EDITOR
-						MeshUtility.Optimize(mesh);
+						//MeshUtility.Optimize(mesh);
 
 						meshFilter.sharedMesh = mesh;
-						meshRenderer.sharedMaterial = new Material(Shader.Find("Mobile/Diffuse"));
-						meshRenderer.sharedMaterial.name = "material";
+						meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
+						meshRenderer.sharedMaterial.SetFloat("_Glossiness", 0.2f);
+						meshRenderer.sharedMaterial.name = "ColourPallete";
 						meshRenderer.sharedMaterial.mainTexture = texture;
-#else
-						meshFilter.mesh = mesh;
-						meshRenderer.material = new Material(Shader.Find("Mobile/Diffuse"));
-						meshRenderer.material.mainTexture = texture;
-#endif
 					}
 				}
 
@@ -544,78 +532,6 @@ namespace Cubizer
 
 				return gameObject;
 			}
-
-			public static GameObject LoadVoxelFileAsGameObject(string path)
-			{
-				var voxel = VoxFileImport.Load(path);
-				return LoadVoxelFileAsGameObject(Path.GetFileNameWithoutExtension(path), voxel, 0);
-			}
-
-			public static GameObject LoadVoxelFileAsGameObjectLOD(string path, int lodLevel)
-			{
-				var voxel = VoxFileImport.Load(path);
-				return LoadVoxelFileAsGameObject(Path.GetFileNameWithoutExtension(path), voxel, lodLevel);
-			}
-
-#if UNITY_EDITOR
-
-			public static GameObject LoadVoxelFileAsPrefab(VoxFileData voxel, string name, string path = "Assets/", int lodLevel = 0)
-			{
-				Debug.Assert(!String.IsNullOrEmpty(name));
-
-				GameObject gameObject = null;
-
-				try
-				{
-					gameObject = LoadVoxelFileAsGameObject(name, voxel, lodLevel);
-
-					var prefabPath = path + name + ".prefab";
-					var prefab = PrefabUtility.CreateEmptyPrefab(prefabPath);
-					var prefabTextures = new Dictionary<string, int>();
-
-					for (int i = 0; i < gameObject.transform.childCount; i++)
-					{
-						var subObject = gameObject.transform.GetChild(i);
-
-						var meshFilter = subObject.GetComponent<MeshFilter>();
-						if (meshFilter != null)
-						{
-							AssetDatabase.AddObjectToAsset(meshFilter.sharedMesh, prefabPath);
-						}
-
-						var renderer = subObject.GetComponent<MeshRenderer>();
-						if (renderer != null)
-						{
-							if (renderer.sharedMaterial != null)
-							{
-								AssetDatabase.AddObjectToAsset(renderer.sharedMaterial, prefabPath);
-
-								var textureName = renderer.sharedMaterial.mainTexture.name;
-								if (!prefabTextures.ContainsKey(textureName))
-								{
-									prefabTextures.Add(textureName, 1);
-
-									AssetDatabase.AddObjectToAsset(renderer.sharedMaterial.mainTexture, prefabPath);
-								}
-							}
-						}
-					}
-
-					return PrefabUtility.ReplacePrefab(gameObject, prefab, ReplacePrefabOptions.ReplaceNameBased);
-				}
-				finally
-				{
-					GameObject.DestroyImmediate(gameObject);
-				}
-			}
-
-			public static GameObject LoadVoxelFileAsPrefab(string path, string outpath = "Assets/", int lodLevel = 0)
-			{
-				var voxel = VoxFileImport.Load(path);
-				return LoadVoxelFileAsPrefab(voxel, Path.GetFileNameWithoutExtension(path), outpath, lodLevel);
-			}
-
-#endif
 		}
 	}
 }

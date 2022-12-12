@@ -1,28 +1,7 @@
-MagicaVoxel for Unity 2017
+MagicaVoxel for Unity
 ========
 ### VOXFileLoader ###
-　　The VOXFileLoader is a .vox reader to convert the .vox file from [MagicaVoxel](https://ephtracy.github.io/) to static GameObject and Prefab with optimized obj file.
-
-![Alt](./Screenshots/screenshots.png)
-
-How to use:
-========
-* Download a zip archive from the github page
-* Un-zip the archive
-* Copy the VOXFileLoader folder to Assets folder
-* Open Window -> Tools -> Cubizer -> show VOXFileLoader inspector
-* Select .vox file in the project view
-* Click 'Create Prefab from .vox file' button, you'll get a prefab and obj file from project view
-
-Features:
-------------
-* Voxel file import for [MagicalVoxel](http://voxel.codeplex.com/)
-* Mesh Optimization
-* Level of detail
-
-Requirements:
-========
-* Unity 2017.2.0 or higher
+　　The VOXFileLoader is a .vox reader to convert the .vox file from [MagicaVoxel](https://ephtracy.github.io/).
 
 Contact:
 ------------
